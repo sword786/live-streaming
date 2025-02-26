@@ -4,20 +4,85 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Stream</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/plyr@3.6.12/dist/plyr.css">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.1.4/dist/hls.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/plyr@3.6.12/dist/plyr.min.js"></script>
     <style>
+        /* Center the video player on the page */
         body {
-            text-align: center;
-            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #000;
+            color: white;
+            flex-direction: column;
         }
-        iframe {
-            width: 100%;
-            height: 600px;
-            border: none;
+
+        /* Video player styling */
+        video {
+            width: 80%;
+            max-width: 800px;
+            border: 3px solid white;
+            border-radius: 10px;
+        }
+
+        h2 {
+            margin-bottom: 10px;
+        }
+
+        /* Fullscreen mode styling */
+        .plyr--full-screen {
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: 100% !important;
+            max-height: 100% !important;
         }
     </style>
 </head>
 <body>
-    <h1>Live Stream</h1>
-    <iframe src="https://neip.pages.dev/NEIP" allowfullscreen></iframe>
+    <h2>Live Streaming</h2>
+    <video id="video-player" controls></video>
+
+    <script>
+        const video = document.getElementById('video-player');
+        const videoSrc = "https://cdnt20.t20hd.cfd/live/m3-index.m3u8"; // Your HLS stream
+
+        if (Hls.isSupported()) {
+            const hls = new Hls();
+            hls.loadSource(videoSrc);
+            hls.attachMedia(video);
+
+            hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                const availableQualities = hls.levels.map(level => level.height);
+                
+                // Initialize Plyr.js with fullscreen & quality settings
+                const player = new Plyr(video, {
+                    autoplay: true,
+                    muted: false,
+                    fullscreen: { enabled: true, fallback: true, iosNative: true }, // Ensure fullscreen works everywhere
+                    controls: ['play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'fullscreen'],
+                    settings: ['quality'],
+                    quality: {
+                        default: availableQualities[0], // Default to first available quality
+                        options: availableQualities, // Allow user selection
+                        forced: true,
+                        onChange: (quality) => {
+                            const level = hls.levels.findIndex(level => level.height === quality);
+                            hls.currentLevel = level;
+                        }
+                    }
+                });
+
+                video.play();
+            });
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = videoSrc;
+            video.addEventListener('loadedmetadata', function () {
+                video.play();
+            });
+        }
+    </script>
 </body>
 </html>
