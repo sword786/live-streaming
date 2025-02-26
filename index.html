@@ -8,7 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/hls.js@1.1.4/dist/hls.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/plyr@3.6.12/dist/plyr.min.js"></script>
     <style>
-        /* Center the video player on the page */
+        /* Ensure the video player is centered on the page */
         body {
             display: flex;
             justify-content: center;
@@ -20,10 +20,17 @@
             flex-direction: column;
         }
 
-        /* Video player styling */
-        video {
+        /* Normal mode: Centered video */
+        .video-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
             width: 80%;
             max-width: 800px;
+        }
+
+        video {
+            width: 100%;
             border: 3px solid white;
             border-radius: 10px;
         }
@@ -32,18 +39,22 @@
             margin-bottom: 10px;
         }
 
-        /* Fullscreen mode styling */
-        .plyr--full-screen {
+        /* Fullscreen mode: Ensure video fits the screen */
+        .plyr--fullscreen video {
             width: 100vw !important;
             height: 100vh !important;
-            max-width: 100% !important;
-            max-height: 100% !important;
+            max-width: 100vw !important;
+            max-height: 100vh !important;
+            border-radius: 0;
+            border: none;
         }
     </style>
 </head>
 <body>
     <h2>Live Streaming</h2>
-    <video id="video-player" controls></video>
+    <div class="video-container">
+        <video id="video-player" controls></video>
+    </div>
 
     <script>
         const video = document.getElementById('video-player');
@@ -57,11 +68,11 @@
             hls.on(Hls.Events.MANIFEST_PARSED, function () {
                 const availableQualities = hls.levels.map(level => level.height);
                 
-                // Initialize Plyr.js with fullscreen & quality settings
+                // Initialize Plyr.js with full-screen & quality settings
                 const player = new Plyr(video, {
                     autoplay: true,
                     muted: false,
-                    fullscreen: { enabled: true, fallback: true, iosNative: true }, // Ensure fullscreen works everywhere
+                    fullscreen: { enabled: true, fallback: true, iosNative: true },
                     controls: ['play', 'progress', 'current-time', 'mute', 'volume', 'settings', 'fullscreen'],
                     settings: ['quality'],
                     quality: {
